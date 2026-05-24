@@ -1,6 +1,16 @@
-import { PrismaClient } from '@prisma/client'
+const { PrismaClient } = require('@prisma/client')
+const { PrismaPg } = require('@prisma/adapter-pg')
+const fs = require('fs')
 
-const prisma = new PrismaClient()
+// Load .env.local
+const envFile = fs.readFileSync('.env.local', 'utf8')
+envFile.split('\n').forEach(line => {
+  const [key, ...rest] = line.split('=')
+  if (key && rest.length) process.env[key.trim()] = rest.join('=').trim()
+})
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log('Seeding...')
